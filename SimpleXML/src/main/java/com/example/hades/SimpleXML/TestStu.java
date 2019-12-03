@@ -49,7 +49,7 @@ public class TestStu {
         return result;
     }
 
-    private void printStuInfo(StuEntry stuEntry) {
+    public static void printStuInfo(StuEntry stuEntry) {
         if (null == stuEntry) {
             return;
         }
@@ -59,7 +59,7 @@ public class TestStu {
         System.out.print("student Phones: " + stuEntry.getPhones() + "\n");
     }
 
-    private String getResourceFileName(String fileName) {
+    public static String getResourceFileName(String fileName) {
         return TestStu.class.getClassLoader().getResource(fileName).getPath();
     }
 }

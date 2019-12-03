@@ -16,5 +16,3 @@
 | Room                   | androidx.room:room-testing           | Y        | 2.0.0          | Y       |              |                 |
 | RxJava2 - RxJava       | io.reactivex.rxjava2:rxjava          | Y        | 2.2.9          | Y       |              |                 |
 | RxJava2 - RxAnroid     | io.reactivex.rxjava2:rxandroid       | Y        | 2.1.1          | Y       |              |                 |
-
-org.simpleframework.xml
