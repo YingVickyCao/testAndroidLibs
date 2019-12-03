@@ -3,6 +3,8 @@ package com.example.hades.SimpleXML.bean;
 
 import org.simpleframework.xml.*;
 
+import java.util.List;
+
 /*
     Case 1 :
      @Namespace(reference = "urn:sun:params:xml:ns:students")
@@ -53,6 +55,9 @@ public class StuEntry {
     @Element
     protected String gender;
 
+    @ElementList(entry = "phone", inline = true, required = false)
+    protected List<String> phones;
+
     public String getId() {
         return id;
     }
@@ -63,5 +68,9 @@ public class StuEntry {
 
     public String getGender() {
         return gender;
+    }
+
+    public List<String> getPhones() {
+        return phones;
     }
 }

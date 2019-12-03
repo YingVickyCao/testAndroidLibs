@@ -18,38 +18,42 @@ public class TestStu {
     }
 
     private void test() throws IOException {
-        String result = "";
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getResourceFileName())));
-        String tmpStr = "";
-        final Serializer serializer;
-        serializer = new Persister();
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getResourceFileName("stu.xml"))));
+        final Serializer serializer = new Persister();
 
+        String tmpStr = "";
+        String result = "";
         while ((tmpStr = br.readLine()) != null) {
             result = result + tmpStr.trim();
         }
         System.out.print("the xml file is: " + result + "\n");
         try {
-            StuRecords studentRecords = serializer.read(StuRecords.class, new String(result));
+            StuRecords studentRecords = serializer.read(StuRecords.class, result);
             List<GradleRecord> gradeList = studentRecords.getGradleRecordList();
-            for (int gradeNo = 0; gradeNo < gradeList.size(); gradeNo++) {
-                GradleRecord eachList = (GradleRecord) (gradeList.get(gradeNo));
+
+            for (GradleRecord eachList : gradeList) {
                 List<StuEntry> entries = eachList.getEntries();
                 System.out.print("\n" + "student Grade: " + eachList.getName() + "\n");
-                for (int studentID = 0; studentID < entries.size(); studentID++) {
-                    StuEntry eachStuEntry = (StuEntry) (entries.get(studentID));
-                    System.out.print("student ID: " + eachStuEntry.getId() + "\n");
-                    System.out.print("student Name: " + eachStuEntry.getName() + "\n");
-                    System.out.print("student Gender: " + eachStuEntry.getGender() + "\n");
+                for (StuEntry stuEntry : entries) {
+                    printStuInfo(stuEntry);
                 }
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
-    // TODO: 2019/12/3  refactor
-    private String getResourceFileName() {
-        return TestStu.class.getClassLoader().getResource("stu.xml").getPath();
+    private void printStuInfo(StuEntry stuEntry){
+        if (null == stuEntry){
+            return;
+        }
+        System.out.print("student ID: " + stuEntry.getId() + "\n");
+        System.out.print("student Name: " + stuEntry.getName() + "\n");
+        System.out.print("student Gender: " + stuEntry.getGender() + "\n");
+        System.out.print("student Phones: " + stuEntry.getPhones() + "\n");
+    }
+
+    private String getResourceFileName(String fileName) {
+        return TestStu.class.getClassLoader().getResource(fileName).getPath();
     }
 }
