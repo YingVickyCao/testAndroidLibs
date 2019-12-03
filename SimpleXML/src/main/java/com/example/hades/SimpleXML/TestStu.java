@@ -18,19 +18,11 @@ public class TestStu {
     }
 
     private void test() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getResourceFileName("stu.xml"))));
+        String result = getXMLString();
         final Serializer serializer = new Persister();
-
-        String tmpStr = "";
-        String result = "";
-        while ((tmpStr = br.readLine()) != null) {
-            result = result + tmpStr.trim();
-        }
-        System.out.print("the xml file is: " + result + "\n");
         try {
             StuRecords studentRecords = serializer.read(StuRecords.class, result);
             List<GradleRecord> gradeList = studentRecords.getGradleRecordList();
-
             for (GradleRecord eachList : gradeList) {
                 List<StuEntry> entries = eachList.getEntries();
                 System.out.print("\n" + "student Grade: " + eachList.getName() + "\n");
@@ -41,6 +33,16 @@ public class TestStu {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    private String getXMLString() throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getResourceFileName("stu.xml"))));
+        String tmpStr = "";
+        String result = "";
+        while ((tmpStr = br.readLine()) != null) {
+            result = result + tmpStr.trim();
+        }
+        System.out.print("the xml file is: " + result + "\n");
+        return result;
     }
 
     private void printStuInfo(StuEntry stuEntry){
