@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--<StudentRecords xmls:soap="http://com.example.hades.SimpleXML">-->
+<!--     <soap:value>123</soap:value> -->
+<!--        https://blog.csdn.net/Fancy_xty/article/details/52814184-->
+
+<StudentRecords xmls="http://com.example.hades.SimpleXML">
+    <list name="grade1">
+
+        <!-- List<SunEntry> entries -->
+        <!-- SunEntry -->
+        <entry id="1">
+            <name>John</name>
+            <gender>Boy</gender>
+<!--            <phone>phone 1</phone>-->
+<!--            <phone>phone 2</phone>-->
+        </entry>
+
+        <!-- SunEntry -->
+        <entry id="2">
+            <name>Joe</name>
+            <gender>Girl</gender>
+        </entry>
+    </list>
+    <list name="grade2">
+        <entry id="1">
+            <name>Bill</name>
+            <gender>Boy</gender>
+        </entry>
+    </list>
+<!--    <im:image height="170">111</im:image>-->
+<!--         <xx im:image="170">111</xx> -->
+</StudentRecords>
