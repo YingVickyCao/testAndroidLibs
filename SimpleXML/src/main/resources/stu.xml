@@ -3,21 +3,24 @@
 <!--     <soap:value>123</soap:value> -->
 <!--        https://blog.csdn.net/Fancy_xty/article/details/52814184-->
 
+<!-- StuRecords -->
 <StudentRecords xmls="http://com.example.hades.SimpleXML">
+<!-- List<GradleRecord> gradleRecordList -->
+<!-- GradleRecord -->
     <list name="grade1">
 
-        <!-- List<SunEntry> entries -->
-        <!-- SunEntry -->
+        <!-- List<StuEntry> entries -->
+        <!-- StuEntry -->
         <entry id="1">
-            <name>John</name>
+            <name>Jobs</name>
             <gender>Boy</gender>
-<!--            <phone>phone 1</phone>-->
-<!--            <phone>phone 2</phone>-->
+            <phone>phone 1</phone>
+            <phone>phone 2</phone>
         </entry>
 
-        <!-- SunEntry -->
+        <!-- StuEntry -->
         <entry id="2">
-            <name>Joe</name>
+            <name2>Helen Keller</name2>
             <gender>Girl</gender>
         </entry>
     </list>

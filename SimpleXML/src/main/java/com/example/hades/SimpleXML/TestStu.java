@@ -1,5 +1,8 @@
 package com.example.hades.SimpleXML;
 
+import com.example.hades.SimpleXML.bean.StuEntry;
+import com.example.hades.SimpleXML.bean.GradleRecord;
+import com.example.hades.SimpleXML.bean.StuRecords;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
@@ -9,9 +12,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
-public class stuTest {
+public class TestStu {
     public static void main(String[] args) throws IOException {
-        new stuTest().test();
+        new TestStu().test();
     }
 
     private void test() throws IOException {
@@ -26,17 +29,17 @@ public class stuTest {
         }
         System.out.print("the xml file is: " + result + "\n");
         try {
-            SunStudent studentRecords = serializer.read(SunStudent.class, new String(result));
-            List<SunList> gradeList = studentRecords.getList();
+            StuRecords studentRecords = serializer.read(StuRecords.class, new String(result));
+            List<GradleRecord> gradeList = studentRecords.getGradleRecordList();
             for (int gradeNo = 0; gradeNo < gradeList.size(); gradeNo++) {
-                SunList eachList = (SunList) (gradeList.get(gradeNo));
-                List<SunEntry> entries = eachList.getEntries();
+                GradleRecord eachList = (GradleRecord) (gradeList.get(gradeNo));
+                List<StuEntry> entries = eachList.getEntries();
                 System.out.print("\n" + "student Grade: " + eachList.getName() + "\n");
                 for (int studentID = 0; studentID < entries.size(); studentID++) {
-                    SunEntry eachEntry = (SunEntry) (entries.get(studentID));
-                    System.out.print("student ID: " + eachEntry.getId() + "\n");
-                    System.out.print("student Name: " + eachEntry.getName() + "\n");
-                    System.out.print("student Gender: " + eachEntry.getGender() + "\n");
+                    StuEntry eachStuEntry = (StuEntry) (entries.get(studentID));
+                    System.out.print("student ID: " + eachStuEntry.getId() + "\n");
+                    System.out.print("student Name: " + eachStuEntry.getName() + "\n");
+                    System.out.print("student Gender: " + eachStuEntry.getGender() + "\n");
                 }
             }
         } catch (Exception e) {
@@ -47,6 +50,6 @@ public class stuTest {
 
     // TODO: 2019/12/3  refactor
     private String getResourceFileName() {
-        return stuTest.class.getClassLoader().getResource("stu.xml").getPath();
+        return TestStu.class.getClassLoader().getResource("stu.xml").getPath();
     }
 }

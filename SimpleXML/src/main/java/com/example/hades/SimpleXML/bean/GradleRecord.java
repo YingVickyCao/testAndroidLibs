@@ -1,4 +1,4 @@
-package com.example.hades.SimpleXML;
+package com.example.hades.SimpleXML.bean;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.ElementList;
@@ -9,14 +9,14 @@ import java.util.List;
 
 @Root(name = "list", strict = false)
 @Namespace(reference = "urn:sun:params:xml:ns:students")
-public class SunList {
-
+public class GradleRecord {
     @Attribute(required = true)
     protected String name;
 
-    // TODO: 2019/12/3  inline = true, inline = true,required = false
-    @ElementList(inline = true, required = false)
-    protected List<SunEntry> entries;
+    // NullPointerException
+    // @ElementList(entry = "stu",inline = true, required = false)
+    @ElementList(entry = "entry", inline = true, required = false)
+    protected List<StuEntry> entries;
 
     public String getName() {
         return name;
@@ -26,11 +26,11 @@ public class SunList {
         this.name = name;
     }
 
-    public List<SunEntry> getEntries() {
+    public List<StuEntry> getEntries() {
         return entries;
     }
 
-    public void setEntries(List<SunEntry> entries) {
+    public void setEntries(List<StuEntry> entries) {
         this.entries = entries;
     }
 }
