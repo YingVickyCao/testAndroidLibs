@@ -1,9 +1,5 @@
 # Simple XML
 
-| Lib name   | package ID(groupId:artifactId) | is tesed | tested version | is used | used version | current version |
-| ---------- | ------------------------------ | -------- | -------------- | ------- | ------------ | --------------- |
-| Simple XML | org.simpleframework:simple-xml | Y        | 2.7.1          | Y       |              |                 |
-
 # Basics
 
 - `@Root`
