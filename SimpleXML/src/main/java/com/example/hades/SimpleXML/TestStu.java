@@ -34,7 +34,11 @@ public class TestStu {
             e.printStackTrace();
         }
     }
+
     private String getXMLString() throws IOException {
+        // ERROR: Exception in thread "main" java.io.FileNotFoundException: stu.xml (No such file or directory)
+        // Refs: https://www.jianshu.com/p/7521bfe45001
+//        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("stu.xml")));
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(getResourceFileName("stu.xml"))));
         String tmpStr = "";
         String result = "";
@@ -45,8 +49,8 @@ public class TestStu {
         return result;
     }
 
-    private void printStuInfo(StuEntry stuEntry){
-        if (null == stuEntry){
+    private void printStuInfo(StuEntry stuEntry) {
+        if (null == stuEntry) {
             return;
         }
         System.out.print("student ID: " + stuEntry.getId() + "\n");
