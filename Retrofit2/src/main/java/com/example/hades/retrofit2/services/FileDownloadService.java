@@ -3,6 +3,7 @@ package com.example.hades.retrofit2.services;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 
 public interface FileDownloadService {
@@ -16,4 +17,9 @@ public interface FileDownloadService {
     // Way 2: using a dynamic URL
     @GET
     Call<ResponseBody> downloadFileWithDynamicUrlSync(@Url String fileUrl);
+
+
+    @Streaming
+    @GET
+    Call<ResponseBody> downloadFileWithDynamicUrlSync2(@Url String fileUrl);
 }

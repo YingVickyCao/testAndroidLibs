@@ -19,7 +19,8 @@ public class DownloadZipTool {
         try {
             downloadService = new FileDownloadServiceCreator().create();
 
-            Call<ResponseBody> call = downloadService.downloadFileWithDynamicUrlSync(ZIP_FILE);
+//            Call<ResponseBody> call = downloadService.downloadFileWithDynamicUrlSync(ZIP_FILE);
+            Call<ResponseBody> call = downloadService.downloadFileWithDynamicUrlSync2(ZIP_FILE);
 
             call.enqueue(new Callback<ResponseBody>() {
                 @Override
@@ -27,10 +28,11 @@ public class DownloadZipTool {
                     if (response.isSuccessful()) {
                         System.out.println(TAG + " : server contacted and has file");
                         boolean writtenToDisk = writeResponseBodyToDisk(response.body());
+//                        File file1 = new File("./file1.txt");
+//                        System.out.println(file1.toString());
                         System.out.println(TAG + " : " + "file download was a success? " + writtenToDisk);
                     } else {
                         System.out.println(TAG + " : " + "server contact failed");
-
                     }
                 }
 
@@ -46,7 +48,7 @@ public class DownloadZipTool {
     }
 
     private String getExternalFilesDir() {
-        return null;
+        return new File(".").getAbsolutePath();
     }
 
     private boolean writeResponseBodyToDisk(ResponseBody body) {
@@ -58,7 +60,7 @@ public class DownloadZipTool {
             OutputStream outputStream = null;
             try {
                 byte[] fileReader = new byte[4096];
-                long fileSize = body.contentLength();
+                long fileSize = body.contentLength(); // TODO: file size  = -1
                 long fileSizeDownloaded = 0;
 
                 inputStream = body.byteStream();

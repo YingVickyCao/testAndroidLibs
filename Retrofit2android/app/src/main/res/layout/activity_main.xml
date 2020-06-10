@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/drawer_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                tools:openDrawer="start">
+
+    <Button
+            android:id="@+id/download_zip"
+            android:layout_centerInParent="true"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:text="Download Zip File"
+            android:layout_height="wrap_content"/>
+
+    <Button
+            android:textAllCaps="false"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/download_zip"
+            android:id="@+id/download_zip_rxjava"
+            android:layout_width="wrap_content"
+            android:text="Download Zip File RxJava"
+            android:layout_height="wrap_content"/>
+
+    <ProgressBar
+            android:visibility="gone"
+            android:layout_below="@+id/download_zip_rxjava"
+            android:id="@+id/progressBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+</RelativeLayout>
