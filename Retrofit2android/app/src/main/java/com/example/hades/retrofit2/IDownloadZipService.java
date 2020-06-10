@@ -8,13 +8,14 @@ import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 import rx.Observable;
 
-public interface RetrofitInterface {
+public interface IDownloadZipService {
 
-    // Regular Retrofit 2 GET request
+    @GET
+    Call<ResponseBody> downloadFile(@Url String fileUrl);
+
     @Streaming
     @GET
-    Call<ResponseBody> downloadFileByUrl(@Url String fileUrl);
-
+    Call<ResponseBody> downloadFile_Streaming(@Url String fileUrl);
 
     // Retrofit 2 GET request for rxjava
     @Streaming

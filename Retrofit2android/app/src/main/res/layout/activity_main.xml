@@ -7,28 +7,39 @@
                 android:fitsSystemWindows="true"
                 tools:openDrawer="start">
 
-    <Button
-            android:id="@+id/download_zip"
+    <LinearLayout
             android:layout_centerInParent="true"
-            android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:text="Download Zip File"
-            android:layout_height="wrap_content"/>
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
 
-    <Button
-            android:textAllCaps="false"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/download_zip"
-            android:id="@+id/download_zip_rxjava"
-            android:layout_width="wrap_content"
-            android:text="Download Zip File RxJava"
-            android:layout_height="wrap_content"/>
+        <Button
+                android:id="@+id/download_zip"
+                android:textAllCaps="false"
+                android:layout_width="wrap_content"
+                android:text="Download Zip File"
+                android:layout_height="wrap_content"/>
 
-    <ProgressBar
-            android:visibility="gone"
-            android:layout_below="@+id/download_zip_rxjava"
-            android:id="@+id/progressBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        <Button
+                android:id="@+id/download_zip_use_streaming"
+                android:textAllCaps="false"
+                android:layout_width="wrap_content"
+                android:text="Download Zip File with streaming"
+                android:layout_height="wrap_content"/>
+
+        <Button
+                android:textAllCaps="false"
+                android:layout_below="@+id/download_zip_use_streaming"
+                android:id="@+id/download_zip_rxjava"
+                android:layout_width="wrap_content"
+                android:text="Download Zip File RxJava"
+                android:layout_height="wrap_content"/>
+
+        <ProgressBar
+                android:visibility="gone"
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+    </LinearLayout>
 
 </RelativeLayout>

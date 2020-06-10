@@ -49,25 +49,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mProgressBar = findViewById(R.id.progressBar);
-
-        findViewById(R.id.download_zip).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                downloadZipFile();
-            }
-        });
-
-        findViewById(R.id.download_zip_rxjava).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                downloadZipFileRx();
-            }
-        });
+        findViewById(R.id.download_zip).setOnClickListener(view -> downloadZipFile_NotUseStreaming());
+        findViewById(R.id.download_zip_use_streaming).setOnClickListener(view -> downloadZipFile_UseStreaming());
+        findViewById(R.id.download_zip_rxjava).setOnClickListener(view -> downloadZipFileRx());
     }
 
     private void downloadZipFileRx() {
         showProgressBar();
-        RetrofitInterface downloadService = createService(RetrofitInterface.class, BASE_URL);
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
         downloadService.downloadFileByUrlRx(FILE_URL)
                 .flatMap(processDownload())
                 .flatMap(unpackZip())
@@ -156,11 +145,19 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    private void downloadZipFile_UseStreaming() {
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
+        Call<ResponseBody> call = downloadService.downloadFile_Streaming(FILE_URL);
+        downloadZipFile(call);
+    }
 
-    private void downloadZipFile() {
-        RetrofitInterface downloadService = createService(RetrofitInterface.class, BASE_URL);
-        Call<ResponseBody> call = downloadService.downloadFileByUrl(FILE_URL);
+    private void downloadZipFile_NotUseStreaming() {
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
+        Call<ResponseBody> call = downloadService.downloadFile(FILE_URL);
+        downloadZipFile(call);
+    }
 
+    private void downloadZipFile(Call<ResponseBody> call) {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
@@ -185,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, t.getMessage());
             }
         });
-
     }
 
     private void showProgressBar() {
