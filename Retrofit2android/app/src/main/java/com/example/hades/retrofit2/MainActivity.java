@@ -38,10 +38,16 @@ public class MainActivity extends AppCompatActivity {
     private final String EXAMPLE_URL_3 = "https://gitee.com/";
     private final String EXAMPLE_FILE_URL_3 = "YingVickyCao/ServerMocker/raw/master/full.zip";
 
-    private final String BASE_URL = EXAMPLE_URL_3;
-    private final String FILE_URL = EXAMPLE_FILE_URL_3;
+    // 6.8MB
+    private final String EXAMPLE_URL_4 = "https://gitee.com/";
+    private final String EXAMPLE_FILE_URL_4 = "YingVickyCao/ServerMocker/raw/master/full2.zip";
+
+    private final String BASE_URL = EXAMPLE_URL_4;
+    private final String FILE_URL = EXAMPLE_FILE_URL_4;
 
     private final String FILE_NAME = "full.zip";
+    private long mTs1;
+    private long mTs2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(handleResult());
-
     }
 
     private Func1<Response<ResponseBody>, Observable<File>> processDownload() {
@@ -146,14 +151,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void downloadZipFile_UseStreaming() {
+        showProgressBar();
         IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
         Call<ResponseBody> call = downloadService.downloadFile_Streaming(FILE_URL);
         downloadZipFile(call);
     }
 
     private void downloadZipFile_NotUseStreaming() {
+        showProgressBar();
         IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
-        Call<ResponseBody> call = downloadService.downloadFile(FILE_URL);
+        Call<ResponseBody> call = downloadService.downloadFile(BASE_URL + FILE_URL);
         downloadZipFile(call);
     }
 
@@ -180,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 t.printStackTrace();
                 Log.e(TAG, t.getMessage());
+                hideProgressBar();
             }
         });
     }
@@ -209,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveToDisk(ResponseBody body, String filename) {
-        showProgressBar();
+        mTs1 = System.currentTimeMillis();
         try {
             File destinationFile = setDestinationFilePath(filename);
             InputStream is = null;
@@ -237,9 +245,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Failed to save the file!");
                 return;
             } finally {
-                hideProgressBar();
                 if (is != null) is.close();
                 if (os != null) os.close();
+                hideProgressBar();
+                mTs2 = System.currentTimeMillis();
+                Log.e(TAG, "saveToDisk: ms=" + (mTs2 - mTs1) + "");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -274,5 +284,11 @@ public class MainActivity extends AppCompatActivity {
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
         return retrofit.create(serviceClass);
+    }
+
+    private OkHttpClient createOkHttpClient() {
+        return new OkHttpClient.Builder()
+//                .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS,ConnectionSpec.COMPATIBLE_TLS))
+                .build();
     }
 }
