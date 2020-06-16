@@ -4,7 +4,24 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okio.BufferedSink;
@@ -21,24 +38,22 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private View mProgressBar;
 
+    // 1.4 MB
     private final String EXAMPLE_URL_1 = "https://github.com/";
     private final String EXAMPLE_FILE_URL_1 = "GameJs/gamejs/archive/master.zip";
 
     private final String EXAMPLE_URL_2 = "https://github.com/";
     private final String EXAMPLE_FILE_URL_2 = "AtomicGameEngine/AtomicGameEngine/archive/master.zip";
 
+    // 72.3kb
     private final String EXAMPLE_URL_3 = "https://gitee.com/";
     private final String EXAMPLE_FILE_URL_3 = "YingVickyCao/ServerMocker/raw/master/full.zip";
 
-    // 6.8MB
+    // 5.4MB
     private final String EXAMPLE_URL_4 = "https://gitee.com/";
     private final String EXAMPLE_FILE_URL_4 = "YingVickyCao/ServerMocker/raw/master/full2.zip";
 
@@ -46,8 +61,11 @@ public class MainActivity extends AppCompatActivity {
     private final String FILE_URL = EXAMPLE_FILE_URL_4;
 
     private final String FILE_NAME = "full.zip";
+
     private long mTs1;
     private long mTs2;
+
+    private IDownloadProgress mDownloadProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +76,22 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.download_zip).setOnClickListener(view -> downloadZipFile_NotUseStreaming());
         findViewById(R.id.download_zip_use_streaming).setOnClickListener(view -> downloadZipFile_UseStreaming());
         findViewById(R.id.download_zip_rxjava).setOnClickListener(view -> downloadZipFileRx());
+        findViewById(R.id.checkUrl).setOnClickListener(view -> checkUrl());
+
+        mDownloadProgress = new IDownloadProgress() {
+            @Override
+            public void update(long bytesRead, long length, boolean done) {
+                Log.d(TAG, "Progress update: " + bytesRead + "/" + length + " >>>> " + (float) bytesRead / length + "===>" + ((int) ((float) bytesRead / length * 100)) + "%");
+            }
+        };
     }
 
     private void downloadZipFileRx() {
         showProgressBar();
-        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         downloadService.downloadFileByUrlRx(FILE_URL)
                 .flatMap(processDownload())
-                .flatMap(unpackZip())
+//                .flatMap(unpackZip())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(handleResult());
@@ -152,14 +178,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void downloadZipFile_UseStreaming() {
         showProgressBar();
-        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         Call<ResponseBody> call = downloadService.downloadFile_Streaming(FILE_URL);
         downloadZipFile(call);
     }
 
     private void downloadZipFile_NotUseStreaming() {
         showProgressBar();
-        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL);
+        IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         Call<ResponseBody> call = downloadService.downloadFile(BASE_URL + FILE_URL);
         downloadZipFile(call);
     }
@@ -224,9 +250,10 @@ public class MainActivity extends AppCompatActivity {
             OutputStream os = null;
 
             try {
-                long filesize = body.contentLength();
-                Log.d(TAG, "File Size=" + filesize);
                 is = body.byteStream();
+                long filesize = body.contentLength();
+//                long filesize = is.available();
+                Log.d(TAG, "File Size=" + filesize);
                 os = new FileOutputStream(destinationFile);
 
                 byte data[] = new byte[4096];
@@ -235,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                 while ((count = is.read(data)) != -1) {
                     os.write(data, 0, count);
                     progress += count;
-                    Log.d(TAG, "Progress: " + progress + "/" + filesize + " >>>> " + (float) progress / filesize);
+                    mDownloadProgress.update(progress, filesize, count == -1);
                 }
                 os.flush();
                 Log.d(TAG, "File saved successfully!");
@@ -277,18 +304,68 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public <T> T createService(Class<T> serviceClass, String baseUrl) {
+    public <T> T createService(Class<T> serviceClass, String baseUrl, final IDownloadProgress callback) {
         Retrofit retrofit = new Retrofit.Builder()
-                .client(new OkHttpClient())
+                .client(createOkHttpClient(callback))
+//                .client(new OkHttpClient())
                 .baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build();
         return retrofit.create(serviceClass);
     }
 
-    private OkHttpClient createOkHttpClient() {
+    private OkHttpClient createOkHttpClient(final IDownloadProgress callback) {
+        /**
+         * // 先填写一个错的hash值，然后根据随后的exception的stack trace message，得到对应的hash值。
+         *        Certificate pinning failure!
+         *       Peer certificate chain:
+         *         sha256/i6zSAujxX6KALeLg5tcKnvOIn+PsoUXIgED2TG3QYJg=: CN=*.gitee.com
+         *         sha256/jzqM6/58ozsPRvxUzg0hzjM+GcfwhTbU/G0TCDvL7hU=: CN=TrustAsia TLS RSA CA,OU=Domain Validated SSL,O=TrustAsia Technologies\, Inc.,C=CN
+         *         sha256/r/mIkG3eEpVdm+u/ko/cwxzOMo1bk4TyHIlByibiA5E=: CN=DigiCert Global Root CA,OU=www.digicert.com,O=DigiCert Inc,C=US
+         *       Pinned certificates for gitee.com:
+         *         sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+         */
+        CertificatePinner certificatePinner = new CertificatePinner.Builder()
+//                .add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+                .add(hostname, "sha256/i6zSAujxX6KALeLg5tcKnvOIn+PsoUXIgED2TG3QYJg=")
+                .build();
+
         return new OkHttpClient.Builder()
+                .certificatePinner(certificatePinner)
+                .hostnameVerifier(new MyHostnameVerifier())
+//                .addInterceptor(new Interceptor() {
+//                    @Override
+//                    public okhttp3.Response intercept(Chain chain) throws IOException {
+//                        okhttp3.Response originResponse = chain.proceed(chain.request());
+//                        return originResponse.newBuilder().body(new FileResponseBody(originResponse.body(), callback)).build();
+//                    }
+//                })
 //                .connectionSpecs(Arrays.asList(ConnectionSpec.MODERN_TLS,ConnectionSpec.COMPATIBLE_TLS))
                 .build();
     }
+
+    String hostname = "gitee.com";
+
+    private void checkUrl() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Tell the URLConnection to use our HostnameVerifier
+                try {
+                    URL url = new URL("https://blog.csdn.net/");
+                    HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                    urlConnection.setHostnameVerifier(new MyHostnameVerifier());
+                    InputStream in = urlConnection.getInputStream();
+                    in.read();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
 }
