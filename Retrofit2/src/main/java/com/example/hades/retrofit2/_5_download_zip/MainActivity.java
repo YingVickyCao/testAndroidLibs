@@ -1,26 +1,7 @@
-package com.example.hades.retrofit2;
+package com.example.hades.retrofit2._5_download_zip;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import javax.net.ssl.HttpsURLConnection;
-
+import com.example.hades.retrofit2.Log;
 import okhttp3.CertificatePinner;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -35,13 +16,18 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+public class MainActivity {
     private static final String TAG = "MainActivity";
-    private View mProgressBar;
 
     // 1.4 MB
     private final String EXAMPLE_URL_1 = "https://github.com/";
@@ -72,18 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     private IDownloadProgress mDownloadProgress;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mProgressBar = findViewById(R.id.progressBar);
-        findViewById(R.id.download_zip).setOnClickListener(view -> downloadZipFile_NotUseStreaming());
-        findViewById(R.id.download_zip_use_streaming).setOnClickListener(view -> downloadZipFile_UseStreaming());
-        findViewById(R.id.download_zip_rxjava).setOnClickListener(view -> downloadZipFileRx());
-        findViewById(R.id.checkUrl).setOnClickListener(view -> checkUrl());
-        findViewById(R.id.checkZipSize).setOnClickListener(view -> checkZipSize());
-
+    public MainActivity() {
         mDownloadProgress = new IDownloadProgress() {
             @Override
             public void update(long bytesRead, long length, boolean done) {
@@ -92,14 +67,15 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private void downloadZipFileRx() {
-        showProgressBar();
+    // TODO: android ok, java not ok
+    public void downloadZipFileRx() {
         IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         downloadService.downloadFileByUrlRx(FILE_URL)
                 .flatMap(processDownload())
-//                .flatMap(unpackZip())
+                .flatMap(unpackZip())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.newThread())
                 .subscribe(handleResult());
     }
 
@@ -169,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(Throwable e) {
-                hideProgressBar();
                 e.printStackTrace();
                 Log.d(TAG, "Error " + e.getMessage());
             }
@@ -177,20 +152,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNext(File file) {
                 Log.d(TAG, "File downloaded and extracted to " + file.getAbsolutePath());
-                hideProgressBar();
             }
         };
     }
 
-    private void downloadZipFile_UseStreaming() {
-        showProgressBar();
+    public void downloadZipFile_UseStreaming() {
         IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         Call<ResponseBody> call = downloadService.downloadFile_Streaming(FILE_URL);
         downloadZipFile(call);
     }
 
-    private void downloadZipFile_NotUseStreaming() {
-        showProgressBar();
+    public void downloadZipFile_NotUseStreaming() {
         IDownloadZipService downloadService = createService(IDownloadZipService.class, BASE_URL, mDownloadProgress);
         Call<ResponseBody> call = downloadService.downloadFile(BASE_URL + FILE_URL);
         downloadZipFile(call);
@@ -202,14 +174,12 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, final Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "Got the body for the file");
-                    new AsyncTask<Void, Long, Void>() {
+                    new Thread(new Runnable() {
                         @Override
-                        protected Void doInBackground(Void... voids) {
+                        public void run() {
                             saveToDisk(response.body(), FILE_NAME);
-                            return null;
                         }
-                    }.execute();
-
+                    }).start();
                 } else {
                     Log.d(TAG, "Connection failed " + response.errorBody());
                 }
@@ -219,33 +189,15 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 t.printStackTrace();
                 Log.e(TAG, t.getMessage());
-                hideProgressBar();
-            }
-        });
-    }
-
-    private void showProgressBar() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-        });
-    }
-
-    private void hideProgressBar() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mProgressBar.setVisibility(View.GONE);
             }
         });
     }
 
     private File setDestinationFilePath(String filename) {
-        new File("/data/data/" + getPackageName() + "/games").mkdir();
-        File destinationFile = new File("/data/data/" + getPackageName() + "/games/" + filename);
-        return destinationFile;
+//        new File("/data/data/" + getPackageName() + "/games").mkdir();
+//        File destinationFile = new File("/data/data/" + getPackageName() + "/games/" + filename);
+//        return destinationFile;
+        return new File("." + File.separator + filename);
     }
 
     private void saveToDisk(ResponseBody body, String filename) {
@@ -280,9 +232,9 @@ public class MainActivity extends AppCompatActivity {
             } finally {
                 if (is != null) is.close();
                 if (os != null) os.close();
-                hideProgressBar();
                 mTs2 = System.currentTimeMillis();
                 Log.e(TAG, "saveToDisk: ms=" + (mTs2 - mTs1) + "");
+                System.exit(0);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -353,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
     }
 
-    private void checkUrl() {
+    public void checkUrl() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -375,10 +327,18 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // Only check zip size, not download zip
-    // Gitee cannot get zip size
-    // Github can get zip size
-    private void checkZipSize() {
+    /*
+    Only check zip size, not download zip
+
+    android
+    TODO:Gitee cannot get zip size
+    Github can get zip size
+
+    Java
+    TODO:Gitee cannot get zip size
+    TODO:Github cannot get zip size
+    */
+    public void checkZipSize() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -397,8 +357,6 @@ public class MainActivity extends AppCompatActivity {
                         response.close();
                     }
                 }
-
-
             }
         }).start();
     }

@@ -49,6 +49,12 @@
             android:layout_height="wrap_content"
             android:text="URL" />
 
+        <Button
+            android:id="@+id/checkZipSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Zip size" />
+
     </LinearLayout>
 
     <ProgressBar

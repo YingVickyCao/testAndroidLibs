@@ -1,17 +1,12 @@
-package com.example.hades.retrofit2;
+package com.example.hades.retrofit2._5_download_zip;
 
-import android.util.Log;
-
-import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.example.hades.retrofit2.Log;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
+import java.security.cert.Certificate;
+import java.util.*;
 
 // https://developer.android.google.cn/training/articles/security-ssl?hl=en
 // making sure the server you are talking to presents the right certificate. When it doesn't : java.io.IOException: Hostname 'example.com' was not verified
