@@ -28,7 +28,6 @@ public class TestFragmemt extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_test, container, false);
-        unbinder = ButterKnife.bind(this, view);
 
         if (null == btn) {
             Log.d(TAG, "onCreateView: btn is null");
@@ -40,11 +39,19 @@ public class TestFragmemt extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        if (null == btn) {
+            Log.d(TAG, "onViewCreated:1 btn is null");
+        } else {
+            Log.d(TAG, "onViewCreated:1 btn is @" + btn.hashCode());  // onViewCreated: btn is @220787194
+        }
+
+        unbinder = ButterKnife.bind(this, view);
+
         super.onViewCreated(view, savedInstanceState);
         if (null == btn) {
-            Log.d(TAG, "onViewCreated: btn is null");
+            Log.d(TAG, "onViewCreated: 2 btn is null");
         } else {
-            Log.d(TAG, "onViewCreated: btn is @" + btn.hashCode());  // onViewCreated: btn is @220787194
+            Log.d(TAG, "onViewCreated: 2 btn is @" + btn.hashCode());  // onViewCreated: btn is @220787194
         }
     }
 
